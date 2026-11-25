@@ -3,6 +3,8 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import type { Settings } from '../types'
 import { computeAgeLabel } from '../lib/age'
+import { useRef } from 'react'
+import { exportBackup, downloadBackup, importBackup } from '../lib/backup'
 
 export function SettingsScreen() {
   const settings = useLiveQuery(async () => {
@@ -100,11 +102,101 @@ function SettingsContent({ initial }: { initial: Settings }) {
       {savedAt > 0 && (
         <p className="text-xs text-green-600">Сохранено</p>
       )}
-
+      
+      <DataSection />
+      
       <p className="text-xs text-slate-400 pt-4 border-t border-slate-200">
         Если дата рождения не указана, в промте останется placeholder
         «[впишите сами]», который можно заполнить вручную перед копированием.
       </p>
+    </div>
+  )
+}
+
+function DataSection() {
+  const [importing, setImporting] = useState(false)
+  const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleExport() {
+    setMessage(null)
+    try {
+      const blob = await exportBackup()
+      downloadBackup(blob)
+      setMessage({ kind: 'ok', text: 'Файл сохранён' })
+    } catch (e) {
+      setMessage({ kind: 'error', text: (e as Error).message })
+    }
+  }
+
+  function triggerImport() {
+    setMessage(null)
+    fileInputRef.current?.click()
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // позволяем выбрать тот же файл повторно
+    if (!file) return
+
+    if (!confirm('Импорт заменит все текущие данные. Сохраните текущее состояние, если не уверены. Продолжить?')) {
+      return
+    }
+
+    setImporting(true)
+    setMessage(null)
+    try {
+      await importBackup(file)
+      setMessage({ kind: 'ok', text: 'Данные восстановлены, перезагружаем…' })
+      setTimeout(() => window.location.reload(), 800)
+    } catch (err) {
+      setMessage({ kind: 'error', text: (err as Error).message })
+      setImporting(false)
+    }
+  }
+
+  return (
+    <div className="pt-4 border-t border-slate-200">
+      <h2 className="text-lg font-semibold text-slate-900 mb-1">Данные</h2>
+      <p className="text-xs text-slate-500 mb-3">
+        Резервная копия хранится у вас на устройстве в виде файла. Никуда не отправляется.
+      </p>
+
+      <div className="space-y-2">
+        <button
+          type="button"
+          onClick={handleExport}
+          className="w-full bg-slate-100 text-slate-700 py-2.5 rounded-lg font-medium"
+        >
+          Скачать резервную копию
+        </button>
+        <button
+          type="button"
+          onClick={triggerImport}
+          disabled={importing}
+          className="w-full bg-slate-100 text-slate-700 py-2.5 rounded-lg font-medium disabled:opacity-50"
+        >
+          {importing ? 'Импорт…' : 'Восстановить из файла'}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+      </div>
+
+      {message && (
+        <p
+          className={
+            'text-xs mt-2 ' +
+            (message.kind === 'ok' ? 'text-green-600' : 'text-red-600')
+          }
+        >
+          {message.text}
+        </p>
+      )}
     </div>
   )
 }
