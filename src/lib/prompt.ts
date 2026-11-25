@@ -1,5 +1,5 @@
 import type { Garment, Scenario } from '../types'
-import { ACTIVITY_LABELS, YES_NO_UNKNOWN_LABELS } from '../types'
+import { ACTIVITY_LABELS} from '../types'
 
 /**
  * Определяет "сегодня" или "завтра" по времени начала прогулки.
@@ -39,12 +39,7 @@ export function buildPrompt(scenario: Scenario,
   lines.push(`Дата и время: ${dateLabel}${timePart}`)
   if (scenario.duration) lines.push(`Длительность: ${scenario.duration}`)
   if (scenario.activity) lines.push(`Активность ребёнка: ${ACTIVITY_LABELS[scenario.activity]}`)
-  if (scenario.hasRainShelter && scenario.hasRainShelter !== 'unknown') {
-    lines.push(`Укрытие от дождя: ${YES_NO_UNKNOWN_LABELS[scenario.hasRainShelter]}`)
-  }
-  if (scenario.hasWindShelter && scenario.hasWindShelter !== 'unknown') {
-    lines.push(`Укрытие от ветра: ${YES_NO_UNKNOWN_LABELS[scenario.hasWindShelter]}`)
-  }
+
   if (scenario.description) {
     lines.push('')
     lines.push(`Описание прогулки: ${scenario.description}`)

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import type { Scenario } from '../types'
-import { ACTIVITY_LABELS, YES_NO_UNKNOWN_LABELS } from '../types'
+import { ACTIVITY_LABELS} from '../types'
 import { ScenarioForm } from './ScenarioForm'
 import { Modal } from './Modal'
 import { PromptModal } from './PromtModal'
@@ -96,16 +96,7 @@ export function ScenarioList() {
                     {ACTIVITY_LABELS[s.activity]}
                   </span>
                 )}
-                {s.hasRainShelter && s.hasRainShelter !== 'unknown' && (
-                  <span className="bg-slate-100 text-slate-700 rounded px-2 py-0.5">
-                    от дождя: {YES_NO_UNKNOWN_LABELS[s.hasRainShelter].toLowerCase()}
-                  </span>
-                )}
-                {s.hasWindShelter && s.hasWindShelter !== 'unknown' && (
-                  <span className="bg-slate-100 text-slate-700 rounded px-2 py-0.5">
-                    от ветра: {YES_NO_UNKNOWN_LABELS[s.hasWindShelter].toLowerCase()}
-                  </span>
-                )}
+
               </div>
 
               <button

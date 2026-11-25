@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from './db'
 import { GarmentList } from './components/GarmentList'
 import { ScenarioList } from './components/ScenarioList'
 import { SettingsScreen } from './components/MySettings'
@@ -6,13 +8,34 @@ import { SettingsScreen } from './components/MySettings'
 type Tab = 'wardrobe' | 'scenarios' | 'settings'
 
 function App() {
-  const [tab, setTab] = useState<Tab>('wardrobe')
+  // null = ещё не решили, какую вкладку открыть
+  const [tab, setTab] = useState<Tab | null>(null)
+
+  // Считаем сценарии. undefined = идёт загрузка, число = загружено
+  const scenarioCount = useLiveQuery(() => db.scenarios.count(), [])
+
+  useEffect(() => {
+    // Определяем стартовую вкладку только один раз — пока tab === null
+    if (tab === null && scenarioCount !== undefined) {
+      setTab(scenarioCount > 0 ? 'scenarios' : 'wardrobe')
+    }
+  }, [tab, scenarioCount])
+
+  // Пока не знаем, какую вкладку показать — минимальный лоадер,
+  // чтобы не было «мигания» гардероба на старте
+  if (tab === null) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <p className="text-sm text-slate-400">Загрузка…</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-10 bg-white border-b border-slate-200">
         <div className="max-w-md mx-auto px-4 pt-3">
-          <h1 className="text-xl font-bold text-slate-900">Одёжка</h1>
+          <h1 className="text-xl font-bold text-slate-900">ОДеть!</h1>
           <nav className="flex gap-1 mt-3 -mb-px">
             <TabButton active={tab === 'wardrobe'} onClick={() => setTab('wardrobe')}>
               Гардероб

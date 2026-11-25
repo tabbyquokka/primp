@@ -11,7 +11,7 @@ interface GarmentFormProps {
 
 export function GarmentForm({ layer, initial, onSave, onCancel }: GarmentFormProps) {
   const [title, setTitle] = useState(initial?.title ?? '')
-  const [link, setLink] = useState(initial?.link ?? '')
+ // const [link, setLink] = useState(initial?.link ?? '')
   const [insulation, setInsulation] = useState<string>(
     initial?.insulation != null ? String(initial.insulation) : ''
   )
@@ -43,7 +43,7 @@ export function GarmentForm({ layer, initial, onSave, onCancel }: GarmentFormPro
       id: initial?.id ?? newId(),
       layer,
       title: title.trim(),
-      link: link.trim() || undefined,
+     // link: link.trim() || undefined,
       insulation: isTop ? insulationNum : undefined,
       modelDescription: isTop ? (modelDescription.trim() || undefined) : undefined,
       createdAt: initial?.createdAt ?? Date.now(),
@@ -60,12 +60,12 @@ export function GarmentForm({ layer, initial, onSave, onCancel }: GarmentFormPro
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className="input"
-          placeholder="Например, зимний комбинезон"
+          placeholder=""
           autoFocus
         />
       </Field>
 
-      <Field label="Ссылка на товар" hint="опц.">
+{/*       <Field label="Ссылка на товар" hint="опц.">
         <input
           type="url"
           value={link}
@@ -73,7 +73,7 @@ export function GarmentForm({ layer, initial, onSave, onCancel }: GarmentFormPro
           className="input"
           placeholder="https://..."
         />
-      </Field>
+      </Field> */}
 
       {isTop && (
         <>
